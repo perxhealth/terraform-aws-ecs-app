@@ -92,7 +92,7 @@ resource "aws_lb_listener_rule" "redirects" {
 
 # Generate a random string to add it to the name of the Target Group
 resource "random_string" "alb_prefix" {
-  length  = 4
+  length  = var.lb_random_string_length
   upper   = false
   special = false
 }

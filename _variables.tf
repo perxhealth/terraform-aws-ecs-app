@@ -17,6 +17,12 @@ variable "protocol" {
   description = "Protocol for target group to listen"
 }
 
+variable "lb_random_string_length" {
+  default = 4
+  description = "Length of random string to append to lb"
+  type = number
+}
+
 variable "memory" {
   default     = "512"
   description = "Hard memory of the container"
