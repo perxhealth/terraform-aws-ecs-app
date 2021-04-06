@@ -99,7 +99,7 @@ resource "random_string" "alb_prefix" {
 resource "aws_lb_target_group" "green" {
   name                 = var.compat_keep_target_group_naming ? "${var.cluster_name}-${var.name}-gr" : format("%s-gr-%s", substr("${var.cluster_name}-${var.name}", 0, 24), random_string.alb_prefix.result)
   port                 = var.port
-  protocol             = "HTTP"
+  protocol             = var.protocol
   vpc_id               = var.vpc_id
   deregistration_delay = 10
   target_type          = var.launch_type == "FARGATE" ? "ip" : "instance"
@@ -122,7 +122,7 @@ resource "aws_lb_target_group" "green" {
 resource "aws_lb_target_group" "blue" {
   name                 = var.compat_keep_target_group_naming ? "${var.cluster_name}-${var.name}-bl" : format("%s-bl-%s", substr("${var.cluster_name}-${var.name}", 0, 24), random_string.alb_prefix.result)
   port                 = var.port
-  protocol             = "HTTP"
+  protocol             = var.protocol
   vpc_id               = var.vpc_id
   deregistration_delay = 10
   target_type          = var.launch_type == "FARGATE" ? "ip" : "instance"

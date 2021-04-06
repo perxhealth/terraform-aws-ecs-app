@@ -12,6 +12,11 @@ variable "port" {
   description = "Port for target group to listen"
 }
 
+variable "protocol" {
+  default     = "HTTP"
+  description = "Protocol for target group to listen"
+}
+
 variable "memory" {
   default     = "512"
   description = "Hard memory of the container"
