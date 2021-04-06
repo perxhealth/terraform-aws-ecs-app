@@ -105,6 +105,7 @@ resource "aws_lb_target_group" "green" {
   target_type          = var.launch_type == "FARGATE" ? "ip" : "instance"
 
   health_check {
+    protocol            = var.protocol
     path                = var.healthcheck_path
     interval            = var.healthcheck_interval
     healthy_threshold   = var.healthy_threshold
@@ -128,6 +129,7 @@ resource "aws_lb_target_group" "blue" {
   target_type          = var.launch_type == "FARGATE" ? "ip" : "instance"
 
   health_check {
+    protocol            = var.protocol
     path                = var.healthcheck_path
     interval            = var.healthcheck_interval
     healthy_threshold   = var.healthy_threshold
