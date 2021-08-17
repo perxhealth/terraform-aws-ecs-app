@@ -7,7 +7,7 @@ resource "aws_codedeploy_deployment_group" "ecs" {
   app_name               = aws_codedeploy_app.ecs.name
   deployment_config_name = var.codedeploy_deployment_config_name
   deployment_group_name  = "${var.cluster_name}-${var.name}"
-  service_role_arn       = aws_iam_role.codedeploy_service.arn
+  service_role_arn       = var.create_iam_codedeployrole == true ? aws_iam_role.codedeploy_service[0].arn : var.codedeploy_role_arn
 
   auto_rollback_configuration {
     enabled = true
@@ -40,11 +40,11 @@ resource "aws_codedeploy_deployment_group" "ecs" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = list(var.alb_listener_https_arn)
+        listener_arns = [var.alb_listener_https_arn]
       }
 
       test_traffic_route {
-        listener_arns = list(var.test_traffic_route_listener_arn)
+        listener_arns = [var.test_traffic_route_listener_arn]
       }
 
       target_group {

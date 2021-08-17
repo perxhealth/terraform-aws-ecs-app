@@ -1,4 +1,3 @@
-
 resource "aws_ecs_service" "default" {
   name                               = var.name
   cluster                            = var.cluster_name
@@ -8,13 +7,29 @@ resource "aws_ecs_service" "default" {
   health_check_grace_period_seconds  = var.service_health_check_grace_period_seconds
   deployment_maximum_percent         = var.service_deployment_maximum_percent
   deployment_minimum_healthy_percent = var.service_deployment_minimum_healthy_percent
-  launch_type                        = var.launch_type
+  enable_execute_command             = true
 
   dynamic "network_configuration" {
     for_each = var.launch_type == "FARGATE" ? [var.subnets] : []
     content {
       subnets         = var.subnets
       security_groups = var.security_groups == "" ? null : var.security_groups
+    }
+  }
+
+  dynamic "placement_constraints" {
+    for_each = var.launch_type == "FARGATE" ? [] : var.placement_constraints
+    content {
+      expression = lookup(placement_constraints.value, "expression", null)
+      type       = placement_constraints.value.type
+    }
+  }
+
+  dynamic "ordered_placement_strategy" {
+    for_each = var.launch_type == "FARGATE" ? [] : var.ordered_placement_strategy
+    content {
+      field = lookup(ordered_placement_strategy.value, "field", null)
+      type  = ordered_placement_strategy.value.type
     }
   }
 
@@ -26,6 +41,12 @@ resource "aws_ecs_service" "default" {
 
   deployment_controller {
     type = "CODE_DEPLOY"
+  }
+
+  capacity_provider_strategy {
+    capacity_provider = var.launch_type == "FARGATE" ? (var.fargate_spot ? "FARGATE_SPOT" : "FARGATE") : "${var.cluster_name}-capacity-provider"
+    weight            = 1
+    base              = 0
   }
 
   lifecycle {

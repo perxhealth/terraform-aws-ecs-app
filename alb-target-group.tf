@@ -24,6 +24,15 @@ resource "aws_lb_listener_rule" "green" {
     }
   }
 
+  dynamic "condition" {
+    for_each = length(var.source_ips) > 0 ? [var.source_ips] : []
+    content {
+      source_ip {
+        values = toset(condition.value)
+      }
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       action[0].target_group_arn
@@ -85,7 +94,7 @@ resource "aws_lb_listener_rule" "redirects" {
 
   condition {
     host_header {
-      values = list(element(split(",", var.hostname_redirects), count.index))
+      values = [element(split(",", var.hostname_redirects), count.index)]
     }
   }
 }
@@ -96,6 +105,7 @@ resource "random_string" "alb_prefix" {
   upper   = false
   special = false
 }
+
 resource "aws_lb_target_group" "green" {
   name                 = var.compat_keep_target_group_naming ? "${var.cluster_name}-${var.name}-gr" : format("%s-gr-%s", substr("${var.cluster_name}-${var.name}", 0, 24), random_string.alb_prefix.result)
   port                 = var.port
@@ -112,11 +122,6 @@ resource "aws_lb_target_group" "green" {
     unhealthy_threshold = var.unhealthy_threshold
     timeout             = var.healthcheck_timeout
     matcher             = var.healthcheck_matcher
-
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
@@ -136,9 +141,5 @@ resource "aws_lb_target_group" "blue" {
     unhealthy_threshold = var.unhealthy_threshold
     timeout             = var.healthcheck_timeout
     matcher             = var.healthcheck_matcher
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
