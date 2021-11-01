@@ -7,7 +7,6 @@ resource "aws_ecs_service" "default" {
   health_check_grace_period_seconds  = var.service_health_check_grace_period_seconds
   deployment_maximum_percent         = var.service_deployment_maximum_percent
   deployment_minimum_healthy_percent = var.service_deployment_minimum_healthy_percent
-  enable_execute_command             = true
 
   dynamic "network_configuration" {
     for_each = var.launch_type == "FARGATE" ? [var.subnets] : []
