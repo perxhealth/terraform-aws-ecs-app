@@ -49,7 +49,9 @@ resource "aws_ecs_service" "default" {
   }
 
   lifecycle {
-    ignore_changes = [load_balancer, task_definition, desired_count]
+    // due to some new weirdness in ECS capacity providers, it keeps trying to override it, ignore strategy for now
+    // this might be fixed in a later version of aws provider
+    ignore_changes = [load_balancer, task_definition, desired_count, capacity_provider_strategy]
   }
 
   depends_on = [
