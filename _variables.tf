@@ -3,12 +3,12 @@ variable "name" {
 }
 
 variable "container_port" {
-  default     = "8080"
+  default     = 8080
   description = "Port your container listens (used in the placeholder task definition)"
 }
 
 variable "port" {
-  default     = "80"
+  default     = 80
   description = "Port for target group to listen"
 }
 
@@ -24,18 +24,18 @@ variable "lb_random_string_length" {
 }
 
 variable "memory" {
-  default     = "512"
+  default     = 512
   description = "Hard memory of the container"
 }
 
 variable "cpu" {
-  default     = "0"
+  default     = 0
   description = "Hard limit for CPU for the container"
 }
 
 variable "paths" {
   default     = []
-  description = "List of path to use on listener rule"
+  description = "List of paths to use on listener rule (example: ['/*'])"
   type        = list(string)
 }
 
@@ -69,10 +69,17 @@ variable "source_ips" {
   description = "List of source ip to use on listerner rule"
 }
 
+variable "http_header" {
+  default     = []
+  description = "Header to use on listerner rule with name e values"
+  type        = list(any)
+}
+
 variable "hostname_redirects" {
   description = "List of hostnames to redirect to the main one, comma-separated"
   default     = ""
 }
+
 
 variable "healthcheck_path" {
   default = "/"
@@ -153,7 +160,7 @@ variable "alb_name" {
 
 variable "alb_priority" {
   default     = 0
-  description = "priority rules ALB"
+  description = "priority rules ALB (leave 0 to let terraform calculate)"
 }
 
 variable "autoscaling_cpu" {
@@ -199,6 +206,11 @@ variable "autoscaling_scale_out_cooldown" {
 variable "alarm_min_healthy_tasks" {
   default     = 2
   description = "Alarm when the number of healthy tasks is less than this number (use 0 to disable this alarm)"
+}
+
+variable "alarm_high_cpu_usage_above" {
+  default     = 80
+  description = "Alarm when CPU is above a certain value (use 0 to disable this alarm)"
 }
 
 variable "alarm_evaluation_periods" {
@@ -320,8 +332,8 @@ variable "ordered_placement_strategy" {
   # This variable may not be used with Fargate!
   description = "Service level strategy rules that are taken into consideration during task placement. List from top to bottom in order of precedence. The maximum number of ordered_placement_strategy blocks is 5."
   type = list(object({
-    field      = string
-    expression = string
+    field = string
+    type  = string
   }))
   default = []
 }
@@ -346,4 +358,122 @@ variable "alarm_prefix" {
   type        = string
   description = "String prefix for cloudwatch alarms. (Optional)"
   default     = "alarm"
+}
+
+variable "efs_mapping" {
+  type        = map(string)
+  description = "A map of efs volume ids and paths to mount into the default task definition"
+  default     = {}
+}
+
+variable "ssm_variables" {
+  type        = map(string)
+  description = "Map of variables and SSM locations to add to the task definition"
+  default     = {}
+}
+
+variable "static_variables" {
+  type        = map(string)
+  description = "Map of variables and static values to add to the task definition"
+  default     = {}
+}
+
+variable "auth_oidc_enabled" {
+  type        = bool
+  default     = false
+  description = "Enables OIDC-authenticated listener rule"
+}
+
+variable "auth_oidc_paths" {
+  type        = list(string)
+  default     = []
+  description = "List of paths to use as a condition to authenticate (example: ['/admin*'])"
+}
+
+variable "auth_oidc_hostnames" {
+  type        = list(string)
+  default     = []
+  description = "List of hostnames to use as a condition to authenticate with OIDC"
+}
+
+variable "auth_oidc_authorization_endpoint" {
+  type        = string
+  default     = ""
+  description = "Authorization endpoint for OIDC (Google: https://accounts.google.com/o/oauth2/v2/auth)"
+}
+
+variable "auth_oidc_client_id" {
+  type        = string
+  default     = ""
+  description = "Client ID for OIDC authentication"
+}
+
+variable "auth_oidc_client_secret" {
+  type        = string
+  default     = ""
+  description = "Client Secret for OIDC authentication"
+}
+
+variable "auth_oidc_issuer" {
+  type        = string
+  default     = ""
+  description = "Issuer URL for OIDC authentication (Google: https://accounts.google.com)"
+}
+
+variable "auth_oidc_token_endpoint" {
+  type        = string
+  default     = ""
+  description = "Token Endpoint URL for OIDC authentication (Google: https://oauth2.googleapis.com/token)"
+}
+
+variable "auth_oidc_user_info_endpoint" {
+  type        = string
+  default     = ""
+  description = "User Info Endpoint URL for OIDC authentication (Google: https://openidconnect.googleapis.com/v1/userinfo)"
+}
+
+variable "auth_oidc_session_timeout" {
+  type        = number
+  default     = 43200
+  description = "Session timeout for OIDC authentication (default 12 hours)"
+}
+
+variable "ulimits" {
+  type = list(object({
+    name      = string
+    hardLimit = number
+    softLimit = number
+  }))
+  description = "Container ulimit settings. This is a list of maps, where each map should contain \"name\", \"hardLimit\" and \"softLimit\""
+  default     = null
+}
+
+variable "autoscaling_custom" {
+  type = list(object({
+    name               = string
+    scale_in_cooldown  = number
+    scale_out_cooldown = number
+    target_value       = number
+    metric_name        = string
+    namespace          = string
+    statistic          = string
+  }))
+  default     = []
+  description = "Set one or more app autoscaling by customized metric"
+}
+
+variable "dynamic_stickiness" {
+  type        = any
+  default     = []
+  description = "Target Group stickiness. Used in dynamic block."
+}
+
+variable "redirects" {
+  description = "Map of path redirects to add to the listener"
+  default     = {}
+}
+
+variable "deployment_controller" {
+  default     = "CODE_DEPLOY"
+  description = "Type of deployment controller. Valid values: CODE_DEPLOY, ECS, EXTERNAL."
 }
