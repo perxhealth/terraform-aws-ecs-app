@@ -45,7 +45,7 @@ resource "aws_lb_listener_rule" "green" {
 
   lifecycle {
     ignore_changes = [
-      action[0].target_group_arn
+      action["target_group_arn"]
     ]
   }
 
@@ -85,7 +85,7 @@ resource "aws_lb_listener_rule" "blue" {
 
   lifecycle {
     ignore_changes = [
-      action[0].target_group_arn
+      action["target_group_arn"]
     ]
   }
 
